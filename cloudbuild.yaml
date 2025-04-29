@@ -1,42 +1,23 @@
-options:
-  logging: CLOUD_LOGGING_ONLY  # ✅ Fix for logs bucket error
-
 steps:
-  # Step 1: Build Frontend
   - name: 'node:lts'
-    id: 'Build Frontend'
-    dir: 'frontend'
-    entrypoint: 'bash'
+    id: Build Frontend
+    entrypoint: bash
     args:
-      - '-c'
+      - -c
       - |
-        npm install --legacy-peer-deps
+        npm ci
         npm run build
 
-  # Step 2: Prepare Backend
-  - name: 'node:lts'
-    id: 'Prepare Backend'
-    dir: 'backend'
-    entrypoint: 'bash'
-    args:
-      - '-c'
-      - |
-        npm install
-        mkdir -p public
-        cp -r ../frontend/dist/* public/
-
-  # Step 3: Deploy to Cloud Run (no env vars here)
   - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
-    id: 'Deploy to Cloud Run'
-    entrypoint: 'gcloud'
+    id: Deploy to Cloud Run
+    entrypoint: gcloud
     args:
-      - 'run'
-      - 'deploy'
-      - 'crm-fullstack-portal'  # ✅ Your combined service name
-      - '--source'
-      - './backend'
-      - '--region'
-      - 'asia-south1'           # ✅ Same as your DB region
-      - '--platform'
-      - 'managed'
-      - '--allow-unauthenticated'
+      - run
+      - deploy
+      - crm-fullstack-portal-v2   # ✅ change this name
+      - --source=.
+      - --region=asia-south1
+      - --platform=managed
+      - --allow-unauthenticated
+      - --set-env-vars
+      - PORT=5000

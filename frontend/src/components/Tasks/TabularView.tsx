@@ -1,10 +1,4 @@
-import React, {
-  useEffect,
-  useState,
-  useMemo,
-  useCallback,
-  useRef,
-} from "react";
+import React, { useEffect, useState, useMemo, useRef } from "react";
 import { Plus, Edit, Trash, ChevronRight, ChevronDown } from "lucide-react";
 import { useTaskStore, Task } from "@/store/taskStore";
 import { Button } from "@/components/ui/button";
@@ -69,7 +63,9 @@ export const TabularView: React.FC = () => {
     fetchTasks(); // Initial fetch
     intervalRef.current = setInterval(fetchTasks, 1000);
 
-    return () => intervalRef.current && clearInterval(intervalRef.current);
+    return () => {
+      if (intervalRef.current) clearInterval(intervalRef.current);
+    };
   }, []);
 
   const rootTasks = useMemo(
@@ -77,20 +73,17 @@ export const TabularView: React.FC = () => {
     [tasks]
   );
 
-  const getSubtasks = useCallback(
-    (taskId: string) => {
-      return Object.values(tasks).filter((task) => task.parentId === taskId);
-    },
-    [tasks]
-  );
+  const getSubtasks = (taskId: string) => {
+    return Object.values(tasks).filter((task) => task.parentId === taskId);
+  };
 
-  const toggleExpanded = useCallback((taskId: string) => {
+  const toggleExpanded = (taskId: string) => {
     setExpandedTasks((prev) => {
       const newSet = new Set(prev);
       newSet.has(taskId) ? newSet.delete(taskId) : newSet.add(taskId);
       return newSet;
     });
-  }, []);
+  };
 
   const formatDueDate = (dueDate?: string) =>
     dueDate ? format(new Date(dueDate), "PP") : "No Due Date";
@@ -167,8 +160,8 @@ export const TabularView: React.FC = () => {
                             item.priority === "high"
                               ? "destructive"
                               : item.priority === "medium"
-                              ? "default"
-                              : "secondary"
+                                ? "default"
+                                : "secondary"
                           }
                         >
                           {item.priority}
@@ -180,7 +173,9 @@ export const TabularView: React.FC = () => {
                         <div className="flex flex-wrap gap-1">
                           {(Array.isArray(item.tags)
                             ? item.tags
-                            : (item.tags || "").split(",")
+                            : typeof item.tags === "string"
+                              ? item.tags.split(",")
+                              : []
                           ).map((tag: string) => (
                             <Badge
                               key={tag.trim()}

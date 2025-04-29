@@ -228,8 +228,7 @@ export const TabularView: React.FC = () => {
                             <AlertDialogHeader>
                               <AlertDialogTitle>Delete Task?</AlertDialogTitle>
                               <AlertDialogDescription>
-                                This action cannot be undone. This will
-                                permanently delete the task.
+                                This action cannot be undone. This will permanently delete the task.
                               </AlertDialogDescription>
                             </AlertDialogHeader>
                             <AlertDialogFooter>

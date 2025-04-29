@@ -1,5 +1,5 @@
 steps:
-  # Step 1: Build Frontend (React)
+  # Step 1: Build Frontend
   - name: 'node:lts'
     id: 'Build Frontend'
     dir: 'frontend'
@@ -10,7 +10,7 @@ steps:
         npm install --legacy-peer-deps
         npm run build
 
-  # Step 2: Prepare Backend (Node.js + Move frontend build)
+  # Step 2: Prepare Backend
   - name: 'node:lts'
     id: 'Prepare Backend'
     dir: 'backend'
@@ -22,22 +22,18 @@ steps:
         mkdir -p public
         cp -r ../frontend/dist/* public/
 
-  # Step 3: Deploy Backend to Cloud Run
+  # Step 3: Deploy to Cloud Run (No env vars here)
   - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
     id: 'Deploy to Cloud Run'
     entrypoint: 'gcloud'
     args:
       - 'run'
       - 'deploy'
-      - 'your-service-name'  # 🔁 Change this to your Cloud Run service name
+      - 'crm-fullstack-portal'     # ✅ Change to your desired service name
       - '--source'
-      - '.'  # Deploy backend folder
+      - './backend'
       - '--region'
-      - 'asia-south1'  # 🔁 Change to your GCP region
+      - 'asia-south1'              # ✅ Same as your DB
       - '--platform'
       - 'managed'
       - '--allow-unauthenticated'
-
-options:
-  logging: CLOUD_LOGGING_ONLY
-timeout: '900s'

@@ -32,7 +32,6 @@ import { Badge } from "@/components/ui/badge";
 import TaskForm from "./TaskForm";
 import { format } from "date-fns";
 
-// const backendUrl = "https://task-manager-app-603782056306.us-central1.run.app";
 const backendUrl = "http://localhost:5000";
 
 export const TabularView: React.FC = () => {
@@ -48,9 +47,10 @@ export const TabularView: React.FC = () => {
         const res = await fetch(`${backendUrl}/api/tasks/get`);
         const data = await res.json();
         if (Array.isArray(data)) {
-          const tasksMap = Object.fromEntries(
-            data.map((task) => [task.id, task])
-          );
+          const tasksMap: Record<string, Task> = {};
+          data.forEach((task: Task) => {
+            tasksMap[task.id] = task;
+          });
           setTasks((prev) =>
             JSON.stringify(prev) !== JSON.stringify(tasksMap) ? tasksMap : prev
           );
@@ -60,7 +60,7 @@ export const TabularView: React.FC = () => {
       }
     };
 
-    fetchTasks(); // Initial fetch
+    fetchTasks();
     intervalRef.current = setInterval(fetchTasks, 1000);
 
     return () => {
@@ -73,7 +73,7 @@ export const TabularView: React.FC = () => {
     [tasks]
   );
 
-  const getSubtasks = (taskId: string) => {
+  const getSubtasks = (taskId: string): Task[] => {
     return Object.values(tasks).filter((task) => task.parentId === taskId);
   };
 
@@ -126,7 +126,7 @@ export const TabularView: React.FC = () => {
             {rootTasks.map((task) => {
               const subtasks = getSubtasks(task.id);
               const isExpanded = expandedTasks.has(task.id);
-              const taskList = [task, ...(isExpanded ? subtasks : [])];
+              const taskList: Task[] = [task, ...(isExpanded ? subtasks : [])];
 
               return (
                 <React.Fragment key={task.id}>
@@ -171,20 +171,29 @@ export const TabularView: React.FC = () => {
                       <TableCell>{item.assignedTo}</TableCell>
                       <TableCell>
                         <div className="flex flex-wrap gap-1">
-                          {(Array.isArray(item.tags)
-                            ? item.tags
-                            : typeof item.tags === "string"
-                              ? item.tags.split(",")
-                              : []
-                          ).map((tag: string, index: number) => (
-                            <Badge
-                              key={index}
-                              variant="outline"
-                              className="text-xs"
-                            >
-                              {tag.trim()}
-                            </Badge>
-                          ))}
+                          {Array.isArray(item.tags)
+                            ? item.tags.map((tag, index) => (
+                              <Badge
+                                key={index}
+                                variant="outline"
+                                className="text-xs"
+                              >
+                                {tag}
+                              </Badge>
+                            ))
+                            : typeof item.tags === "string" && item.tags
+                              ? (item.tags as string).trim().length > 0
+                                ? (item.tags as string).split(",").map((tag, index) => (
+                                  <Badge
+                                    key={index}
+                                    variant="outline"
+                                    className="text-xs"
+                                  >
+                                    {tag.trim()}
+                                  </Badge>
+                                ))
+                                : null
+                              : null}
                         </div>
                       </TableCell>
                       <TableCell className="text-right">
@@ -228,7 +237,8 @@ export const TabularView: React.FC = () => {
                             <AlertDialogHeader>
                               <AlertDialogTitle>Delete Task?</AlertDialogTitle>
                               <AlertDialogDescription>
-                                This action cannot be undone. This will permanently delete the task.
+                                This action cannot be undone. This will
+                                permanently delete the task.
                               </AlertDialogDescription>
                             </AlertDialogHeader>
                             <AlertDialogFooter>

@@ -5,9 +5,8 @@ import {
   flexRender,
   ColumnDef,
 } from "@tanstack/react-table";
-import { useState, useMemo, useEffect, useCallback } from "react";
+import { useState, useMemo, useEffect } from "react"; // 🔥 useCallback hata diya
 import { Button } from "@/components/ui/button";
-
 import { Input } from "@/components/ui/input";
 import {
   Select,
@@ -34,7 +33,6 @@ export default function ContactTable() {
 
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [editingContact, setEditingContact] = useState<Contact | undefined>(undefined);
-
   const [searchTerm, setSearchTerm] = useState("");
   const [sortBy, setSortBy] = useState("name");
 
@@ -54,15 +52,12 @@ export default function ContactTable() {
         toast.error("Failed to load contacts.");
       }
     };
-  
     fetchData();
   }, [fetchContactsFromStore]);
-  
-  
 
   const filteredContacts = useMemo(() => {
     if (!Array.isArray(contacts)) return [];
-  
+
     return contacts
       .filter((c) => {
         const nameMatch = c.name?.toLowerCase().includes(searchTerm.toLowerCase());
@@ -76,9 +71,6 @@ export default function ContactTable() {
       });
   }, [contacts, searchTerm, sortBy]);
 
-  console.log("🟢 Filtered Contacts:", filteredContacts);
-
-
   const handleDeleteClick = (contact: Contact) => {
     setContactToDelete(contact);
     setIsDeleteModalOpen(true);
@@ -86,7 +78,7 @@ export default function ContactTable() {
 
   const confirmDelete = () => {
     if (contactToDelete) {
-      deleteContact(contactToDelete.id); // delete the contact from the store
+      deleteContact(contactToDelete.id);
       toast.success(`${contactToDelete.name} deleted successfully`);
       setContactToDelete(null);
       setIsDeleteModalOpen(false);
@@ -127,7 +119,6 @@ export default function ContactTable() {
       id: "actions",
       cell: ({ row }) => {
         const contact = row.original;
-
         return (
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
@@ -206,7 +197,6 @@ export default function ContactTable() {
               </tr>
             ))}
           </thead>
-
           <tbody className="bg-white text-black">
             {table.getRowModel().rows.map((row) => (
               <tr key={row.id} className="border-t hover:bg-gray-50">

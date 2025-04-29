@@ -55,40 +55,41 @@ const TaskForm: React.FC<TaskFormProps> = ({
     Array.isArray(initialValues?.tags)
       ? initialValues.tags.join(", ")
       : initialValues?.tags || ""
-  );  
+  );
   const [status, setStatus] = useState(initialValues?.status || "Todo");
   const [parentId, setParentId] = useState(
     defaultParentId || initialValues?.parentId || "none"
   );
   const [loading, setLoading] = useState(false);
   const [parentTasks, setParentTasks] = useState<Task[]>([]);
-  const { tasks, columns } = useTaskStore();
+  const { columns } = useTaskStore(); // ✅ only columns used now
 
   useEffect(() => {
     fetch(`${backendUrl}/api/tasks/get`)
       .then((response) => response.json())
       .then((data) => {
         let filteredTasks = data.filter((task: Task) => !task.parentId);
-        // Exclude current task from parent options when editing
         if (initialValues) {
-          filteredTasks = filteredTasks.filter((task: { id: string; }) => task.id !== initialValues.id);
+          filteredTasks = filteredTasks.filter(
+            (task: { id: string }) => task.id !== initialValues.id
+          );
         }
         setParentTasks(filteredTasks);
       })
       .catch((error) => console.error("Error fetching tasks:", error));
-  }, [initialValues]);  
+  }, [initialValues]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-  
+
     if (!startDate || !dueDate || dueDate < startDate) {
       alert("Invalid dates. Ensure the due date is after the start date.");
       return;
     }
-  
+
     if (loading) return;
     setLoading(true);
-  
+
     const taskData = {
       title,
       description,
@@ -96,34 +97,34 @@ const TaskForm: React.FC<TaskFormProps> = ({
       dueDate: format(dueDate, "yyyy-MM-dd HH:mm:ss"),
       assignedTo,
       priority,
-      tags: tags.split(",").map((tag) => tag.trim()).filter(Boolean),
+      tags: tags
+        .split(",")
+        .map((tag) => tag.trim())
+        .filter(Boolean),
       status: status.trim(),
       ...(parentId !== "none" && { parentId }),
     };
-  
+
     try {
       let response;
       if (initialValues?.id) {
-        // Update existing task
         response = await axios.put(
           `${backendUrl}/api/tasks/update/${initialValues.id}`,
           taskData
         );
       } else {
-        // Add new task
         response = await axios.post(`${backendUrl}/api/tasks/post`, taskData);
       }
-  
+
       console.log("✅ Task saved successfully:", response.data);
-      
-      onSubmit(response.data); // Update tasks state in `TabularView`
+      onSubmit(response.data);
     } catch (error) {
-      // console.error("❌ Error saving task:", error.response?.data || error);
+      console.error("❌ Error saving task:", error);
     } finally {
       setLoading(false);
     }
   };
-  
+
   return (
     <form
       onSubmit={handleSubmit}
@@ -159,11 +160,7 @@ const TaskForm: React.FC<TaskFormProps> = ({
                 className="w-full justify-start text-left font-normal"
               >
                 <CalendarIcon className="mr-2 h-4 w-4" />
-                {startDate ? (
-                  format(startDate, "PPP")
-                ) : (
-                  <span>Pick a date</span>
-                )}
+                {startDate ? format(startDate, "PPP") : <span>Pick a date</span>}
               </Button>
             </PopoverTrigger>
             <PopoverContent className="w-auto p-0" align="start">
@@ -258,7 +255,7 @@ const TaskForm: React.FC<TaskFormProps> = ({
           </SelectContent>
         </Select>
       </div>
-      
+
       <div>
         <Label htmlFor="parentTask">Parent Task (Optional)</Label>
         <Select value={parentId} onValueChange={setParentId}>
@@ -290,8 +287,8 @@ const TaskForm: React.FC<TaskFormProps> = ({
         {loading
           ? "Submitting..."
           : initialValues
-          ? "Update Task"
-          : "Create Task"}
+            ? "Update Task"
+            : "Create Task"}
       </Button>
     </form>
   );

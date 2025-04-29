@@ -10,9 +10,7 @@ import {
   MoreVertical,
   Trash,
   Calendar,
-  Clock,
   Tag,
-  CheckSquare,
 } from "lucide-react";
 import {
   Dialog,
@@ -93,26 +91,14 @@ export const SortableTask: React.FC<SortableTaskProps> = ({
     }
   };
 
-  // Format time to be more readable
-  const formatTime = (time: string) => {
-    if (!time) return null;
-    try {
-      const date = new Date(time);
-      return format(date, "h:mm a");
-    } catch {
-      return null;
-    }
-  };
-
   return (
     <div
       ref={setNodeRef}
       style={style}
       {...attributes}
       {...listeners}
-      className={`kanban-task p-4 rounded-md border bg-white shadow-sm ${
-        isDragging ? "opacity-50" : ""
-      } hover:shadow-md transition-shadow cursor-move`}
+      className={`kanban-task p-4 rounded-md border bg-white shadow-sm ${isDragging ? "opacity-50" : ""
+        } hover:shadow-md transition-shadow cursor-move`}
     >
       <div className="flex items-start">
         <div className="flex-1 flex flex-col gap-3 text-left">
@@ -126,7 +112,6 @@ export const SortableTask: React.FC<SortableTaskProps> = ({
                   variant="ghost"
                   size="icon"
                   className="h-8 w-8 ml-auto"
-                  // Prevent drag when clicking on dropdown
                   onClick={(e) => e.stopPropagation()}
                 >
                   <MoreVertical className="h-4 w-4" />
@@ -216,39 +201,6 @@ export const SortableTask: React.FC<SortableTaskProps> = ({
                 </span>
               </div>
             )}
-
-            {/* Start/End Time */}
-            {/* {(task.startTime || task.endTime) && (
-              <div className="flex items-center gap-2 text-sm text-muted-foreground justify-start">
-                <Clock className="h-4 w-4 flex-shrink-0" />
-                <span className="text-left">
-                  {task.startTime && formatTime(task.startTime)}
-                  {task.startTime && task.endTime && " - "}
-                  {task.endTime && formatTime(task.endTime)}
-                </span>
-              </div>
-            )} */}
-
-            {/* Labels/Tags */}
-            {/* {task.labels && task.labels.length > 0 && (
-              <div className="flex flex-wrap gap-1 mt-1 justify-start">
-                {task.labels.map((label, idx) => (
-                  <Badge key={idx} variant="outline" className="text-xs">
-                    {label}
-                  </Badge>
-                ))}
-              </div>
-            )} */}
-
-            {/* Status */}
-            {/* {task.completionStatus && (
-              <div className="flex items-center gap-2 text-sm justify-start">
-                <CheckSquare className="h-4 w-4 text-muted-foreground flex-shrink-0" />
-                <span className="capitalize text-left">
-                  {task.completionStatus}
-                </span>
-              </div>
-            )} */}
           </div>
 
           {/* Subtasks Section */}

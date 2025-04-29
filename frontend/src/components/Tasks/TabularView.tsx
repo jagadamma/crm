@@ -176,9 +176,9 @@ export const TabularView: React.FC = () => {
                             : typeof item.tags === "string"
                               ? item.tags.split(",")
                               : []
-                          ).map((tag: string) => (
+                          ).map((tag: string, index: number) => (
                             <Badge
-                              key={tag.trim()}
+                              key={index}
                               variant="outline"
                               className="text-xs"
                             >

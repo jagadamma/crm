@@ -21,8 +21,7 @@ import { CalendarIcon } from "lucide-react";
 import { Task, Priority, useTaskStore } from "@/store/taskStore";
 import axios from "axios";
 
-// const backendUrl = "https://task-manager-app-603782056306.us-central1.run.app";
-const backendUrl = "http://localhost:5000";
+
 
 interface TaskFormProps {
   onSubmit: (data: Omit<Task, "id">) => void;
@@ -65,7 +64,7 @@ const TaskForm: React.FC<TaskFormProps> = ({
   const { columns } = useTaskStore(); // ✅ only columns used now
 
   useEffect(() => {
-    fetch(`${backendUrl}/api/tasks/get`)
+    fetch(`api/tasks/get`)
       .then((response) => response.json())
       .then((data) => {
         let filteredTasks = data.filter((task: Task) => !task.parentId);
@@ -109,11 +108,11 @@ const TaskForm: React.FC<TaskFormProps> = ({
       let response;
       if (initialValues?.id) {
         response = await axios.put(
-          `${backendUrl}/api/tasks/update/${initialValues.id}`,
+          `api/tasks/update/${initialValues.id}`,
           taskData
         );
       } else {
-        response = await axios.post(`${backendUrl}/api/tasks/post`, taskData);
+        response = await axios.post(`api/tasks/post`, taskData);
       }
 
       console.log("✅ Task saved successfully:", response.data);

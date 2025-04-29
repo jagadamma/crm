@@ -36,7 +36,7 @@ interface ContactStore {
   addActivityToContact: (id: string, activity: string) => Promise<void>;
 }
 
-const API = `${process.env.REACT_APP_BASE_API_URL}api/contacts`;
+const API = `api/contacts`;
 
 export const useContacts = create<ContactStore>()(
   persist(

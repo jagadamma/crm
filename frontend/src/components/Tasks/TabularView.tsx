@@ -32,7 +32,7 @@ import { Badge } from "@/components/ui/badge";
 import TaskForm from "./TaskForm";
 import { format } from "date-fns";
 
-const backendUrl = "http://localhost:5000";
+
 
 export const TabularView: React.FC = () => {
   const { updateTask, deleteTask } = useTaskStore();
@@ -44,7 +44,7 @@ export const TabularView: React.FC = () => {
   useEffect(() => {
     const fetchTasks = async () => {
       try {
-        const res = await fetch(`${backendUrl}/api/tasks/get`);
+        const res = await fetch(`api/tasks/get`);
         const data = await res.json();
         if (Array.isArray(data)) {
           const tasksMap: Record<string, Task> = {};

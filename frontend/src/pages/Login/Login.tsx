@@ -40,7 +40,7 @@ const Login: React.FC = () => {
     e.preventDefault();
     setError("");
     try {
-      const response = await axios.post(`${process.env.REACT_APP_BASE_API_URL}api/auth/login`, formData);
+      const response = await axios.post(`api/auth/login`, formData);
       const { token, user } = response.data;
       toast.success("Successfully logged in!");
       // :white_tick: Store and initialize token

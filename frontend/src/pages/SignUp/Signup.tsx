@@ -25,7 +25,7 @@ const Signup: React.FC = () => {
   const handleRegister = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     try {
-      const response = await axios.post(`${process.env.REACT_APP_BASE_API_URL}api/auth/register`, formData);
+      const response = await axios.post(`api/auth/register`, formData);
       console.log(response.data.message);
       toast.success("User Registered Successfully!", {
         position: "top-right",

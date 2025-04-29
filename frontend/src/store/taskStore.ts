@@ -42,9 +42,8 @@ interface TaskState {
 const DEFAULT_COLUMNS = ["todo", "in-progress", "done"];
 
 // API Base URL
-const API_URL = `${process.env.REACT_APP_BASE_API_URL}api/`;
-// const backendUrl = "https://task-manager-app-603782056306.us-central1.run.app";
-const backendUrl = process.env.REACT_APP_BASE_API_URL;
+const API_URL = `api/`;
+
 
 export const useTaskStore = create<TaskState>((set) => ({
   tasks: {},
@@ -155,7 +154,7 @@ export const useTaskStore = create<TaskState>((set) => ({
 
   addTask: async (task) => {
     try {
-      const response = await axios.post(`${backendUrl}/api/tasks/post`, task);
+      const response = await axios.post(`api/tasks/post`, task);
       const newTask = response.data;
 
       set((state) => {
@@ -178,7 +177,7 @@ export const useTaskStore = create<TaskState>((set) => ({
 
   updateTask: async (id, updatedTask) => {
     try {
-      await axios.put(`${backendUrl}/api/tasks/update/${id}`, updatedTask);
+      await axios.put(`api/tasks/update/${id}`, updatedTask);
       set((state) => ({
         tasks: { ...state.tasks, [id]: { ...state.tasks[id], ...updatedTask } },
       }));
@@ -189,7 +188,7 @@ export const useTaskStore = create<TaskState>((set) => ({
 
   deleteTask: async (id) => {
     try {
-      await axios.delete(`${backendUrl}/api/tasks/delete/${id}`);
+      await axios.delete(`api/tasks/delete/${id}`);
       set((state) => {
         const newTasks = { ...state.tasks };
         delete newTasks[id];

@@ -1,3 +1,6 @@
+options:
+  logging: CLOUD_LOGGING_ONLY  # ✅ Fix for logs bucket error
+
 steps:
   - name: 'node:lts'
     id: Build Frontend

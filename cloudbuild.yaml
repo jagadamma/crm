@@ -1,0 +1,43 @@
+steps:
+  # Step 1: Build Frontend (React)
+  - name: 'node:lts'
+    id: 'Build Frontend'
+    dir: 'frontend'
+    entrypoint: 'bash'
+    args:
+      - '-c'
+      - |
+        npm install --legacy-peer-deps
+        npm run build
+
+  # Step 2: Prepare Backend (Node.js + Move frontend build)
+  - name: 'node:lts'
+    id: 'Prepare Backend'
+    dir: 'backend'
+    entrypoint: 'bash'
+    args:
+      - '-c'
+      - |
+        npm install
+        mkdir -p public
+        cp -r ../frontend/dist/* public/
+
+  # Step 3: Deploy Backend to Cloud Run
+  - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
+    id: 'Deploy to Cloud Run'
+    entrypoint: 'gcloud'
+    args:
+      - 'run'
+      - 'deploy'
+      - 'your-service-name'  # 🔁 Change this to your Cloud Run service name
+      - '--source'
+      - '.'  # Deploy backend folder
+      - '--region'
+      - 'asia-south1'  # 🔁 Change to your GCP region
+      - '--platform'
+      - 'managed'
+      - '--allow-unauthenticated'
+
+options:
+  logging: CLOUD_LOGGING_ONLY
+timeout: '900s'

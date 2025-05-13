@@ -8,19 +8,19 @@ export interface Contact {
   name: string;
   email: string;
   phone: string;
-  companyname: string;
-  companysize: string;
-  founder: string;
-  website: string;
+  companyName: string;
+  companySize: string;
+  founderName: string;
+  companyWebsite: string;
   role: string;
-  industrytype: string;
-  location: string;
-  companylinkedin: string;
-  linkedinprofile: string;
+  industryType: string;
+  companyLocation: string;
+  companyLinkedinUrl: string;
+  linkedinProfileUrl: string;
   status: string;
   image?: string;
   createdAt: string;
-  activity?: string[];
+  activity?: string[]; 
 }
 
 // Store type
@@ -44,14 +44,37 @@ export const useContacts = create<ContactStore>()(
       contacts: [],
 
       fetchContacts: async () => {
-        try {
-          const res = await axios.get(`${API}/getall`);
-          console.log("📦 API Response:", res.data);
-          set({ contacts: Array.isArray(res.data) ? res.data : [] });
-        } catch (error) {
-          console.error("Failed to fetch contacts:", error);
-        }
-      },
+  try {
+    const res = await axios.get(`${API}/getall`);
+    console.log("📦 API Response:", res.data);
+
+    const rawContacts = res.data.contacts || [];
+
+    const formattedContacts: Contact[] = rawContacts.map((c: any) => ({
+      id: c.id.toString(),
+      name: `${c.firstName} ${c.lastName}`,
+      email: c.email ?? "",
+      phone: c.phoneNo ?? "", // ✅ corrected here
+      companyName: c.companyName ?? "",
+      companySize: c.companySize ?? "",
+      founderName: c.founderName ?? "",
+      companyWebsite: c.companyWebsite ?? "",
+      role: c.role ?? "",
+      industryType: c.industryType ?? "",
+      companyLocation: c.companyLocation ?? "",
+      companyLinkedinUrl: c.companyLinkedinUrl ?? "",
+      linkedinProfileUrl: c.linkedinProfileUrl ?? "",
+      status: c.status ?? "active",
+      createdAt: new Date(c.createdAt).toLocaleDateString(),
+      activity: c.activity ?? [],
+      image: c.image ?? undefined,
+    }));
+
+    set({ contacts: formattedContacts });
+  } catch (error) {
+    console.error("Failed to fetch contacts:", error);
+  }
+},
 
       addContact: async (contact) => {
         try {

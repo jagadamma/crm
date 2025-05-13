@@ -36,12 +36,19 @@ const Contact = sequelize.define('Contact', {
         primaryKey: true,
         autoIncrement: true,
       },
-    fullName: {
+     // Name fields
+    firstName: {
         type: DataTypes.STRING,
         allowNull: false,
-        trim: true,
         validate: {
-            len: [1, 255] // Maximum length of 255 characters
+        len: [1, 255]
+        }
+    },
+    lastName: {
+        type: DataTypes.STRING,
+        allowNull: false,
+        validate: {
+        len: [1, 255]
         }
     },
     email: {
@@ -66,19 +73,20 @@ const Contact = sequelize.define('Contact', {
         type: DataTypes.INTEGER,
         allowNull: true
     },
-    phoneNo: {
-        type: DataTypes.STRING,
-        allowNull: false,
-        unique: true,
-        validate: {
-            is: /^[0-9]+$/i // Only numbers allowed
-
-        }
-    },
+ phoneNo: {
+    type: DataTypes.STRING,
+    allowNull: false,
+    unique: true,
+    validate: {
+        notEmpty: true,       // 🔐 Prevent empty string
+        is: /^[0-9]+$/i       // 🔐 Allow only digits
+    }
+}
+,
     companyLocation: {
-        type: DataTypes.STRING,
+        type: DataTypes.ENUM('USA', 'CANADA', 'UAE', 'INDIA', 'EUROPE'),
         allowNull: true
-    },
+      },
     role: {
         type: DataTypes.STRING,
         allowNull: true

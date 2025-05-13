@@ -52,6 +52,10 @@ const cloudinary = require('cloudinary').v2;
 
 const app = express();
 
+// ⬇ Increase the limit to 10mb (you can adjust as needed)
+app.use(bodyParser.json({ limit: '10mb' }));
+app.use(bodyParser.urlencoded({ limit: '10mb', extended: true }));
+
 // Cloudinary configuration
 cloudinary.config({
     cloud_name: process.env.CLOUD_NAME,

@@ -5,7 +5,7 @@ import {
   flexRender,
   ColumnDef,
 } from "@tanstack/react-table";
-import { useState, useMemo, useEffect } from "react"; // 🔥 useCallback hata diya
+import { useState, useMemo, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -21,7 +21,13 @@ import {
   DropdownMenuContent,
   DropdownMenuItem,
 } from "@/components/ui/dropdown-menu";
-import { Dialog, DialogContent, DialogHeader, DialogFooter, DialogTitle } from "@/components/ui/dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogFooter,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { MoreHorizontal, Eye, Pencil, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 import type { Contact } from "@/store/contactStore";
@@ -30,17 +36,14 @@ import AddContactDrawer from "@/components/AddContactDrawer";
 export default function ContactTable() {
   const deleteContact = useContacts((state) => state.deleteContact);
   const contacts = useContacts((s) => s.contacts);
+  const fetchContactsFromStore = useContacts((state) => state.fetchContacts);
 
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [editingContact, setEditingContact] = useState<Contact | undefined>(undefined);
   const [searchTerm, setSearchTerm] = useState("");
   const [sortBy, setSortBy] = useState("name");
-
-  // Delete confirmation modal states
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [contactToDelete, setContactToDelete] = useState<Contact | null>(null);
-
-  const fetchContactsFromStore = useContacts((state) => state.fetchContacts);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -57,7 +60,6 @@ export default function ContactTable() {
 
   const filteredContacts = useMemo(() => {
     if (!Array.isArray(contacts)) return [];
-
     return contacts
       .filter((c) => {
         const nameMatch = c.name?.toLowerCase().includes(searchTerm.toLowerCase());
@@ -94,7 +96,7 @@ export default function ContactTable() {
           {row.original.image && (
             <img
               src={row.original.image}
-              className="w-8 h-8 rounded-full"
+              className="w-8 h-8 rounded-full object-cover"
               alt={row.original.name}
             />
           )}
@@ -103,17 +105,19 @@ export default function ContactTable() {
       ),
     },
     { header: "Email", accessorKey: "email" },
-    { header: "Company Name", accessorKey: "companyname" },
-    { header: "Company Size", accessorKey: "companysize" },
-    { header: "Website", accessorKey: "website" },
-    { header: "CEO/Founder/CTO", accessorKey: "founder" },
+    { header: "Company", accessorKey: "companyName" },
+    { header: "Phone", accessorKey: "phone" },
+    { header: "Size", accessorKey: "companySize" },
+    { header: "Website", accessorKey: "companyWebsite" },
+    { header: "Founder", accessorKey: "founderName" },
     { header: "Role", accessorKey: "role" },
-    { header: "Contact No", accessorKey: "phone" },
-    { header: "Industry Type", accessorKey: "industrytype" },
-    { header: "Location", accessorKey: "location" },
-    { header: "Company Linkedin", accessorKey: "companylinkedin" },
-    { header: "Linkedin Profile", accessorKey: "linkedinprofile" },
-    { header: "Created At", accessorKey: "createdAt" },
+    { header: "Industry", accessorKey: "industryType" },
+    { header: "Location", accessorKey: "companyLocation" },
+    { header: "Linkedin", accessorKey: "companyLinkedinUrl" },
+    { header: "Profile", accessorKey: "linkedinProfileUrl" },
+    { header: "Status", accessorKey: "status" },
+
+    { header: "Created", accessorKey: "createdAt" },
     {
       header: "Action",
       id: "actions",
@@ -158,46 +162,45 @@ export default function ContactTable() {
   });
 
   return (
-    <div className="p-6 space-y-4">
-      <div className="flex justify-between items-center">
-        <h2 className="text-2xl font-bold">Contacts</h2>
+    <div className="p-6 space-y-6">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+        <h2 className="text-2xl font-bold text-gray-800">Contacts</h2>
+        <div className="flex flex-col sm:flex-row gap-3">
+          <Input
+            placeholder="Search by name or email"
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            className="max-w-xs"
+          />
+          <Select value={sortBy} onValueChange={(value) => setSortBy(value)}>
+            <SelectTrigger className="w-[180px]">
+              <SelectValue placeholder="Sort by" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="name">Name</SelectItem>
+              <SelectItem value="createdAt">Date</SelectItem>
+            </SelectContent>
+          </Select>
+          <Button onClick={() => setDrawerOpen(true)} className="bg-green-600 hover:bg-green-700">
+            Add Contact
+          </Button>
+        </div>
       </div>
 
-      <div className="flex flex-wrap gap-4 items-center">
-        <Input
-          placeholder="Search by name or email"
-          value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
-          className="max-w-sm"
-        />
-
-        <Select value={sortBy} onValueChange={(value) => setSortBy(value)}>
-          <SelectTrigger className="w-[180px]">
-            <SelectValue placeholder="Sort by" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="name">Name</SelectItem>
-            <SelectItem value="createdAt">Date</SelectItem>
-          </SelectContent>
-        </Select>
-
-        <Button onClick={() => setDrawerOpen(true)}>Add Contact</Button>
-      </div>
-
-      <div className="w-full overflow-x-auto rounded-sm">
-        <table className="w-full text-sm border-none">
-          <thead className="bg-gray-200 text-black">
+      <div className="overflow-x-auto rounded-lg border bg-white">
+        <table className="min-w-full text-sm text-gray-800">
+          <thead className="bg-gray-100 border-b">
             {table.getHeaderGroups().map((headerGroup) => (
               <tr key={headerGroup.id}>
                 {headerGroup.headers.map((header) => (
-                  <th key={header.id} className="px-4 py-2 text-left">
+                  <th key={header.id} className="px-4 py-2 text-left font-medium">
                     {flexRender(header.column.columnDef.header, header.getContext())}
                   </th>
                 ))}
               </tr>
             ))}
           </thead>
-          <tbody className="bg-white text-black">
+          <tbody>
             {table.getRowModel().rows.map((row) => (
               <tr key={row.id} className="border-t hover:bg-gray-50">
                 {row.getVisibleCells().map((cell) => (
@@ -212,15 +215,21 @@ export default function ContactTable() {
       </div>
 
       {/* Add/Edit Drawer */}
-      {drawerOpen && (
-        <AddContactDrawer
-          onClose={() => {
-            setDrawerOpen(false);
-            setEditingContact(undefined);
-          }}
-          contact={editingContact}
-        />
-      )}
+     {drawerOpen && (
+  <AddContactDrawer
+    contact={editingContact}
+    onClose={() => {
+      setDrawerOpen(false);
+      setEditingContact(undefined);
+    }}
+    onSave={async () => {
+      await fetchContactsFromStore(); // ✅ This will refresh the contact list
+      setDrawerOpen(false);
+      setEditingContact(undefined);
+    }}
+  />
+)}
+
 
       {/* Delete Confirmation Modal */}
       <Dialog open={isDeleteModalOpen} onOpenChange={setIsDeleteModalOpen}>
@@ -229,10 +238,7 @@ export default function ContactTable() {
             <DialogTitle>Are you sure?</DialogTitle>
             <p className="text-sm text-muted-foreground">
               Do you really want to delete{" "}
-              <span className="font-semibold text-black">
-                {contactToDelete?.name}
-              </span>
-              ?
+              <span className="font-semibold text-black">{contactToDelete?.name}</span>?
             </p>
           </DialogHeader>
           <DialogFooter className="mt-4">

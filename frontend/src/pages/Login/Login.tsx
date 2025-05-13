@@ -40,7 +40,7 @@ const Login: React.FC = () => {
     e.preventDefault();
     setError("");
     try {
-      const response = await axios.post(`api/auth/login`, formData);
+      const response = await axios.post(`/api/auth/login`, formData);
       const { token, user } = response.data;
       toast.success("Successfully logged in!");
       // :white_tick: Store and initialize token
@@ -49,6 +49,7 @@ const Login: React.FC = () => {
       localStorage.setItem("userData", JSON.stringify(user));
       setFormData({ email: "", password: "" });
       setTimeout(() => navigate("/homelayout"), 1500);
+      
     } catch (err: any) {
       if (err.response && err.response.data && err.response.data.message) {
         setError(err.response.data.message);

@@ -119,42 +119,40 @@ export default function AddContactDrawer({
     reader.readAsDataURL(file);
   };
 
-  const handleSubmit = async () => {
-    if (!form.firstName.trim()) {
-      toast.error("First Name is required");
-      return;
-    }
+const handleSubmit = async () => {
+  if (!form.firstName.trim()) {
+    toast.error("First Name is required");
+    return;
+  }
 
-    const payload = {
-      ...form,
-      name: `${form.firstName} ${form.lastName}`.trim(),
-      phone: form.phoneNo,
-      companyLocation: form.location,
-    };
-
-    const { location, ...finalPayload } = payload;
-
-    try {
-      if (contact) {
-        await updateContact({
-          ...payload,
-          id: contact.id,
-          createdAt: contact.createdAt,
-          activity: contact.activity || [],
-        });
-        toast.success(`${form.firstName} updated successfully!`);
-      } else {
-        await addContact(payload);
-        toast.success(`${form.firstName} contact added successfully!`);
-      }
-
-      onSave(); // ✅ Notify parent to refresh list
-      onClose(); // ✅ Close drawer
-    } catch (err) {
-      toast.error("Something went wrong!");
-      console.error("Submission error:", err);
-    }
+  const payload = {
+    ...form,
+    name: `${form.firstName} ${form.lastName}`.trim(),
+    phone: form.phoneNo,
+    companyLocation: form.location,
   };
+
+  try {
+    if (contact) {
+      await updateContact({
+        ...payload,
+        id: contact.id,
+        createdAt: contact.createdAt,
+        activity: contact.activity || [],
+      });
+      toast.success(`${form.firstName} updated successfully!`);
+    } else {
+      await addContact(payload);
+      toast.success(`${form.firstName} contact added successfully!`);
+    }
+
+    onSave(); // ✅ Notify parent to refresh list
+    onClose(); // ✅ Close drawer
+  } catch (err) {
+    toast.error("Something went wrong!");
+    console.error("Submission error:", err);
+  }
+};
 
   return (
     <div className="fixed top-0 right-0 w-full max-w-[500px] h-full bg-white dark:bg-black z-50 p-6 overflow-y-auto space-y-4 shadow-lg border-l">

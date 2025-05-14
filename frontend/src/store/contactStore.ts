@@ -7,7 +7,7 @@ export interface Contact {
   id: string;
   name: string;
   email: string;
-  phone: string;
+  phoneNo: string;
   companyName: string;
   companySize: string;
   founderName: string;
@@ -20,7 +20,7 @@ export interface Contact {
   status: string;
   image?: string;
   createdAt: string;
-  activity?: string[]; 
+  activity?: string[];
 }
 
 // Store type
@@ -44,46 +44,73 @@ export const useContacts = create<ContactStore>()(
       contacts: [],
 
       fetchContacts: async () => {
-  try {
-    const res = await axios.get(`${API}/getall`);
-    console.log("📦 API Response:", res.data);
+        try {
+          const res = await axios.get(`${API}/getall`);
+          const rawContacts = res.data.contacts || [];
 
-    const rawContacts = res.data.contacts || [];
+          const formattedContacts: Contact[] = rawContacts.map((c: any) => ({
+            id: c.id.toString(),
+            name: `${c.firstName} ${c.lastName}`,
+            email: c.email ?? "",
+            phoneNo: c.phoneNo ?? "",
+            companyName: c.companyName ?? "",
+            companySize: c.companySize ?? "",
+            founderName: c.founderName ?? "",
+            companyWebsite: c.companyWebsite ?? "",
+            role: c.role ?? "",
+            industryType: c.industryType ?? "",
+            companyLocation: c.companyLocation ?? "",
+            companyLinkedinUrl: c.companyLinkedinUrl ?? "",
+            linkedinProfileUrl: c.linkedinProfileUrl ?? "",
+            status: c.status ?? "active",
+            createdAt: new Date(c.createdAt).toLocaleDateString(),
+            activity: c.activity ?? [],
+            image: c.image ?? undefined,
+          }));
 
-    const formattedContacts: Contact[] = rawContacts.map((c: any) => ({
-      id: c.id.toString(),
-      name: `${c.firstName} ${c.lastName}`,
-      email: c.email ?? "",
-      phone: c.phoneNo ?? "", // ✅ corrected here
-      companyName: c.companyName ?? "",
-      companySize: c.companySize ?? "",
-      founderName: c.founderName ?? "",
-      companyWebsite: c.companyWebsite ?? "",
-      role: c.role ?? "",
-      industryType: c.industryType ?? "",
-      companyLocation: c.companyLocation ?? "",
-      companyLinkedinUrl: c.companyLinkedinUrl ?? "",
-      linkedinProfileUrl: c.linkedinProfileUrl ?? "",
-      status: c.status ?? "active",
-      createdAt: new Date(c.createdAt).toLocaleDateString(),
-      activity: c.activity ?? [],
-      image: c.image ?? undefined,
-    }));
-
-    set({ contacts: formattedContacts });
-  } catch (error) {
-    console.error("Failed to fetch contacts:", error);
-  }
-},
+          set({ contacts: formattedContacts });
+        } catch (error) {
+          console.error("Failed to fetch contacts:", error);
+        }
+      },
 
       addContact: async (contact) => {
         try {
-          console.log('Sending contact data:', contact); // Log contact data
-          const res = await axios.post(`${API}/create`, contact);
-          const newContact = {
-            ...res.data,
-            activity: ["Contact created"],
+          const [firstName, ...rest] = contact.name.trim().split(" ");
+          const lastName = rest.join(" ");
+
+          const payload = {
+            ...contact,
+            firstName,
+            lastName,
+            phoneNo: contact.phoneNo,
           };
+
+          delete (payload as any).name;
+          delete (payload as any).phone;
+
+          const res = await axios.post(`${API}/create`, payload);
+
+          const newContact: Contact = {
+            id: res.data.id.toString(),
+            name: `${firstName} ${lastName}`,
+            email: contact.email,
+            phoneNo: contact.phoneNo,
+            companyName: contact.companyName,
+            companySize: contact.companySize,
+            founderName: contact.founderName,
+            companyWebsite: contact.companyWebsite,
+            role: contact.role,
+            industryType: contact.industryType,
+            companyLocation: contact.companyLocation,
+            companyLinkedinUrl: contact.companyLinkedinUrl,
+            linkedinProfileUrl: contact.linkedinProfileUrl,
+            status: contact.status,
+            createdAt: new Date().toLocaleDateString(),
+            activity: ["Contact created"],
+            image: contact.image,
+          };
+
           set((state) => ({
             contacts: [...state.contacts, newContact],
           }));
@@ -92,19 +119,62 @@ export const useContacts = create<ContactStore>()(
         }
       },
 
-
       updateContact: async (contact) => {
         try {
-          const res = await axios.put(`${API}/edit/${contact.id}`, contact);
+          const {
+            id,
+            name,
+            email,
+            phoneNo,
+            companyName,
+            companySize,
+            founderName,
+            companyWebsite,
+            role,
+            industryType,
+            companyLocation,
+            companyLinkedinUrl,
+            linkedinProfileUrl,
+            status,
+            image,
+          } = contact;
+
+          const [firstName, ...rest] = name.trim().split(" ");
+          const lastName = rest.join(" ");
+
+          const payload = {
+            firstName,
+            lastName,
+            email,
+            phoneNo: phoneNo,
+            companyName,
+            companySize,
+            founderName,
+            companyWebsite,
+            role,
+            industryType,
+            companyLocation,
+            companyLinkedinUrl,
+            linkedinProfileUrl,
+            status,
+            image,
+          };
+
+          await axios.put(`${API}/edit/${id}`, payload);
+
           const updatedContact: Contact = {
-            ...res.data,
+            ...contact,
+            ...payload,
+            name: `${firstName} ${lastName}`,
+            phoneNo: phoneNo,
             activity: contact.activity
               ? [...contact.activity, "Contact updated"]
               : ["Contact updated"],
           };
+
           set((state) => ({
             contacts: state.contacts.map((c) =>
-              c.id === contact.id ? updatedContact : c
+              c.id === id ? updatedContact : c
             ),
           }));
         } catch (error) {
@@ -137,14 +207,13 @@ export const useContacts = create<ContactStore>()(
         try {
           await axios.post(`${API}/${id}/activity`, { activity: newActivity });
 
-          // Update state
           set((state) => ({
             contacts: state.contacts.map((contact) =>
               contact.id === id
                 ? {
-                  ...contact,
-                  activity: [...(contact.activity || []), newActivity],
-                }
+                    ...contact,
+                    activity: [...(contact.activity || []), newActivity],
+                  }
                 : contact
             ),
           }));

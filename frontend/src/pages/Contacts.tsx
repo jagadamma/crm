@@ -106,7 +106,7 @@ export default function ContactTable() {
     },
     { header: "Email", accessorKey: "email" },
     { header: "Company", accessorKey: "companyName" },
-    { header: "Phone", accessorKey: "phone" },
+    { header: "Phone", accessorKey: "phoneNo" },
     { header: "Size", accessorKey: "companySize" },
     { header: "Website", accessorKey: "companyWebsite" },
     { header: "Founder", accessorKey: "founderName" },

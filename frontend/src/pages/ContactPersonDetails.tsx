@@ -55,7 +55,7 @@ const ContactPersonDetails = () => {
         <div className="flex-1 space-y-2">
           <h2 className="text-2xl font-bold">{contact.name}</h2>
           <p className="text-sm text-gray-600 dark:text-white">{contact.email}</p>
-          <p className="text-sm text-gray-600 dark:text-white">{contact.phone}</p>
+          <p className="text-sm text-gray-600 dark:text-white">{contact.phoneNo}</p>
           <Badge className="mt-2 capitalize">{contact.status}</Badge>
         </div>
       </Card>

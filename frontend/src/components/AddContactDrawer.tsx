@@ -78,7 +78,7 @@ export default function AddContactDrawer({
         firstName,
         lastName,
         email: contact.email || "",
-        phoneNo: contact.phone || "",
+        phoneNo: contact.phoneNo || "",
         companyName: contact.companyName || "",
         companySize: contact.companySize || "",
         companyWebsite: contact.companyWebsite || "",

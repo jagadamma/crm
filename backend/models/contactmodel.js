@@ -1,4 +1,3 @@
-
 const sequelize = require('../db/db.js');
 const { DataTypes } = require('sequelize');
 
@@ -58,7 +57,9 @@ const Contact = sequelize.define('Contact', {
         validate: {
             isEmail: true
         },
-        trim: true 
+        set(value) {
+    this.setDataValue('email', value.trim());
+  }
 
     },
     companyName: {
@@ -70,18 +71,25 @@ const Contact = sequelize.define('Contact', {
         allowNull: true
     },
     companySize: {
-        type: DataTypes.INTEGER,
-        allowNull: true
-    },
+    type: DataTypes.STRING,
+    allowNull: true
+},
+
  phoneNo: {
     type: DataTypes.STRING,
     allowNull: false,
     unique: true,
     validate: {
-        notEmpty: true,       // 🔐 Prevent empty string
-        is: /^[0-9]+$/i       // 🔐 Allow only digits
+        notEmpty: {
+            msg: 'Phone number cannot be empty'
+        },
+        is: {
+            args: /^[0-9]+$/i,
+            msg: 'Phone number must contain only digits'
+        }
     }
 }
+
 ,
     companyLocation: {
         type: DataTypes.ENUM('USA', 'CANADA', 'UAE', 'INDIA', 'EUROPE'),
@@ -103,6 +111,16 @@ const Contact = sequelize.define('Contact', {
         type: DataTypes.STRING,
         allowNull: true
     },
+    address: {
+    type: DataTypes.STRING,
+    allowNull: true
+    },
+
+    createdBy: {
+  type: DataTypes.INTEGER,  // user id number asel tar
+  allowNull: false
+    },
+
 
     // Social Media Links
     companyLinkedinUrl: {
@@ -115,10 +133,10 @@ const Contact = sequelize.define('Contact', {
     },
 
     // Image
-    image: {
-        type: DataTypes.TEXT,
-        allowNull: true
-    },
+   image: {
+  type: DataTypes.TEXT('long'), // equivalent to LONGTEXT
+  allowNull: true,
+},
 
 }, {
     tableName: 'contacts', // Explicitly set the table name
@@ -142,5 +160,22 @@ Activity.associate = (models) => {
 };
 
 
+// Unique check function
+const checkUniqueEmailOrPhone = async (email, phoneNo, excludeId = null) => {
+  const whereClause = {
+    [sequelize.Sequelize.Op.or]: [{ email }, { phoneNo }]
+  };
 
-module.exports = {Contact, Activity}
+  if (excludeId) {
+    whereClause.id = { [sequelize.Sequelize.Op.ne]: excludeId };
+  }
+
+  const existingContact = await Contact.findOne({
+    where: whereClause
+  });
+
+  return existingContact;
+};
+
+
+module.exports = {Contact, Activity, checkUniqueEmailOrPhone}

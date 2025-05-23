@@ -177,8 +177,8 @@ export const KanbanBoard: React.FC = () => {
         <div className="flex items-center gap-4">
           <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
             <DialogTrigger asChild>
-              <Button>
-                <Plus className="mr-2 h-4 w-4" />
+              <Button className="bg-green-600 hover:bg-green-700 cursor-pointer">
+                <Plus className="h-4 w-4" />
                 Add Task
               </Button>
             </DialogTrigger>
@@ -203,7 +203,7 @@ export const KanbanBoard: React.FC = () => {
               onChange={(e) => setNewColumnTitle(e.target.value)}
               className="max-w-[200px]"
             />
-            <Button onClick={handleAddColumn} variant="outline">
+            <Button className="cursor-pointer" onClick={handleAddColumn} variant="outline">
               Add Column
             </Button>
           </div>

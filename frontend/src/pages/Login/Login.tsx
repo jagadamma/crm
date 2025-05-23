@@ -11,12 +11,7 @@ interface FormData {
 
 const Login: React.FC = () => {
   const navigate = useNavigate();
-  const [formData, setFormData] = useState<FormData>({
-    email: "",
-    password: "",
-  });
-  const [error, setError] = useState<string>("");
-  const [loading, setLoading] = useState<boolean>(false);
+  const [formData, setFormData] = useState<FormData>({ email: "", password: "" });
 
   useEffect(() => {
     const accessToken = localStorage.getItem("accessToken");
@@ -33,26 +28,26 @@ const Login: React.FC = () => {
 
   const handleLogin = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    setError("");
-    setLoading(true);
 
     try {
-      const response = await axios.post(`/api/auth/login`, formData);
-      const { token, user } = response.data;
+      const response = await axios.post("/api/auth/login", formData);
+      const { accessToken, refreshToken, user } = response.data;
+      console.log("Logged in user ID:", user.id);
 
-      localStorage.setItem("accessToken", token);
-      axios.defaults.headers.common["Authorization"] = `Bearer ${token}`;
+      localStorage.setItem("accessToken", response.data.accessToken);
+      localStorage.setItem('refreshToken', refreshToken);
       localStorage.setItem("userData", JSON.stringify(user));
+      axios.defaults.headers.common["Authorization"] = `Bearer ${accessToken}`;
 
-      toast.success("Successfully logged in!");
-      setFormData({ email: "", password: "" });
-      setTimeout(() => navigate("/homelayout"));
-    } catch (err: any) {
-      const message =
-        err?.response?.data?.message || "Login failed. Please try again.";
-      setError(message);
-    } finally {
-      setLoading(false);
+      toast.success("Login successful!");
+
+    navigate("/homelayout");
+    } catch (err: unknown) {
+      if (axios.isAxiosError(err) && err.response?.data?.message) {
+        toast.error(err.response.data.message);
+      } else {
+        toast.error("Login failed. Please try again.");
+      }
     }
   };
 
@@ -97,24 +92,15 @@ const Login: React.FC = () => {
             />
           </div>
 
-          {error && (
-            <p className="text-red-600 text-sm text-center">{error}</p>
-          )}
-
           <button
             type="submit"
-            disabled={loading}
-            className={`w-full py-2 rounded-lg font-semibold text-white ${
-              loading
-                ? "bg-purple-300 cursor-not-allowed"
-                : "bg-purple-700 hover:bg-purple-600"
-            }`}
+            className="w-full py-2 rounded-lg font-semibold text-white bg-purple-700 hover:bg-purple-600"
           >
-            {loading ? "Logging in..." : "Log In"}
+            Log In
           </button>
 
           <div className="text-center text-sm text-gray-600 mt-4">
-            Don't have an account?
+            Don’t have an account?
             <button
               type="button"
               onClick={() => navigate("/signup")}
@@ -125,7 +111,8 @@ const Login: React.FC = () => {
           </div>
         </form>
       </div>
-      <ToastContainer position="top-center" autoClose={2000} />
+
+      <ToastContainer position="top-right" />
     </div>
   );
 };

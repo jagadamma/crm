@@ -1,4 +1,4 @@
-const { Contact, Activity } = require('../models/contactmodel.js');
+const { Contact, Activity, checkUniqueEmailOrPhone } = require('../models/contactmodel.js');
 const { Op } = require('sequelize');
 
 // Create a new contact
@@ -21,10 +21,14 @@ const createContact = async (req, res) => {
             companyLinkedinUrl,
             linkedinProfileUrl,
             image,
-            companyLocation
+            companyLocation,
+            address
         } = req.body;
 
-        // Create a new contact with firstName, lastName, city, and state
+
+        // Authenticated user id gheto (JWT middleware ne set kelay asel)
+        const createdBy = req.user.id;  // he aaplya auth middleware var depend karte
+
         const newContact = await Contact.create({
             firstName,
             lastName,
@@ -42,27 +46,40 @@ const createContact = async (req, res) => {
             companyLinkedinUrl,
             linkedinProfileUrl,
             image,
-            companyLocation
+            companyLocation,
+            address,
+            createdBy  // user id save karat aahes
         });
 
         res.status(201).json({ message: 'Contact created successfully', contact: newContact });
     } catch (error) {
-        console.error(error); // Log the error for debugging
+        console.error(error);
         res.status(500).json({ message: 'Error creating contact', error: error.message });
     }
 };
 
 // Get all contacts
-const getAllContacts = async (req, res) => {
-    try {
-        // Fetch all contacts from the database
-        const contacts = await Contact.findAll();
+// const getAllContacts = async (req, res) => {
+//     try {
+//         const contacts = await Contact.findAll();
+//         res.status(200).json({ message: 'Contacts fetched successfully', contacts });
+//     } catch (error) {
+//         console.error(error);
+//         res.status(500).json({ message: 'Error fetching contacts', error: error.message });
+//     }
+// };
 
-        // Return the contacts in the response
-        res.status(200).json({ message: 'Contacts fetched successfully', contacts });
+const getMyContacts = async (req, res) => {
+    try {
+        const userId = req.user.id; // JWT middleware madhun milto
+        const contacts = await Contact.findAll({
+            where: { createdBy: userId }
+        });
+
+        res.status(200).json({ message: 'User-specific contacts fetched successfully', contacts });
     } catch (error) {
-        console.error(error); // Log the error for debugging
-        res.status(500).json({ message: 'Error fetching contacts', error: error.message });
+        console.error(error);
+        res.status(500).json({ message: 'Error fetching user-specific contacts', error: error.message });
     }
 };
 
@@ -70,21 +87,36 @@ const getAllContacts = async (req, res) => {
 const deleteContact = async (req, res) => {
     try {
         const { id } = req.params;
-
         const contact = await Contact.findByPk(id);
 
         if (!contact) {
             return res.status(404).json({ message: 'Contact not found' });
         }
 
-        // Delete the contact
         await contact.destroy();
-
-        // Return success response
         res.status(200).json({ message: 'Contact deleted successfully' });
     } catch (error) {
-        console.error(error); // Log the error for debugging
+        console.error(error);
         res.status(500).json({ message: 'Error deleting contact', error: error.message });
+    }
+};
+
+// Delete multiple contacts
+const deleteMultipleContacts = async (req, res) => {
+    try {
+        const { ids } = req.body;
+        if (!Array.isArray(ids) || ids.length === 0) {
+            return res.status(400).json({ message: 'No contact IDs provided' });
+        }
+
+        const deleted = await Contact.destroy({
+            where: { id: ids }
+        });
+
+        res.status(200).json({ message: `${deleted} contact(s) deleted successfully` });
+    } catch (error) {
+        console.error('Error deleting multiple contacts:', error);
+        res.status(500).json({ message: 'Error deleting contacts', error: error.message });
     }
 };
 
@@ -92,7 +124,6 @@ const deleteContact = async (req, res) => {
 const getContact = async (req, res) => {
     try {
         const { id } = req.params;
-
         const contact = await Contact.findByPk(id);
 
         if (!contact) {
@@ -110,7 +141,6 @@ const getContact = async (req, res) => {
 const editContact = async (req, res) => {
     try {
         const { id } = req.params;
-
         const contact = await Contact.findByPk(id);
 
         if (!contact) {
@@ -134,8 +164,13 @@ const editContact = async (req, res) => {
             companyLinkedinUrl,
             linkedinProfileUrl,
             image,
-            companyLocation
+            companyLocation,
+            address
         } = req.body;
+
+        if (!phoneNo) {
+            return res.status(400).json({ error: "Phone number is required" });
+        }
 
         contact.firstName = firstName;
         contact.lastName = lastName;
@@ -153,7 +188,8 @@ const editContact = async (req, res) => {
         contact.companyLinkedinUrl = companyLinkedinUrl;
         contact.linkedinProfileUrl = linkedinProfileUrl;
         contact.image = image;
-        contact.companyLocation = companyLocation; 
+        contact.companyLocation = companyLocation;
+        contact.address = address;
 
         await contact.save();
 
@@ -173,8 +209,6 @@ const searchContact = async (req, res) => {
             return res.status(400).json({ message: 'Search query is required' });
         }
 
-        const regex = new RegExp(query, 'i');
-
         const contacts = await Contact.findAll({
             where: {
                 [Op.or]: [
@@ -183,7 +217,8 @@ const searchContact = async (req, res) => {
                     { email: { [Op.like]: `%${query}%` } },
                     { phoneNo: { [Op.like]: `%${query}%` } },
                     { role: { [Op.like]: `%${query}%` } },
-                    { companyName: { [Op.like]: `%${query}%` } }
+                    { companyName: { [Op.like]: `%${query}%` } },
+                    { address: { [Op.like]: `%${query}%` } }
                 ]
             }
         });
@@ -201,7 +236,7 @@ const sortContact = async (req, res) => {
     let order = [];
 
     if (sortBy === 'name') {
-        order = [['firstName', 'ASC']]; // Sort by firstName
+        order = [['firstName', 'ASC']];
     } else if (sortBy === 'date') {
         order = [['createdAt', 'DESC']];
     }
@@ -241,18 +276,16 @@ const addActivityToContact = async (req, res) => {
             return res.status(404).json({ message: 'Contact not found' });
         }
 
-        const newActivity = await Activity.create({
+        await Activity.create({
             activityType,
             description,
             contactId: id
         });
 
-        console.log(newActivity);
-
         res.status(200).json({ message: 'Activity added successfully' });
     } catch (error) {
         console.error('Error adding activity:', error);
-        res.status(500).json({ message: 'Internal server error' });
+        res.status(500).json({ message: 'Internal server error', error: error.message });
     }
 };
 
@@ -275,7 +308,7 @@ const deleteActivity = async (req, res) => {
         res.status(200).json({ message: 'Activity deleted successfully' });
     } catch (error) {
         console.error('Error deleting activity:', error);
-        res.status(500).json({ message: 'Internal server error' });
+        res.status(500).json({ message: 'Internal server error', error: error.message });
     }
 };
 
@@ -301,10 +334,30 @@ const getContactActivities = async (req, res) => {
     }
 };
 
+const checkUnique = async (req, res) => {
+    try {
+        const { email, phoneNo, excludeId } = req.query;
+
+        const contact = await checkUniqueEmailOrPhone(email, phoneNo, excludeId);
+
+        if (contact) {
+            return res.status(409).json({ exists: true });
+        }
+
+        return res.json({ exists: false });
+    } catch (error) {
+        console.error("Error in uniqueness check:", error);
+        return res.status(500).json({ message: "Server Error", error: error.message });
+    }
+};
+
+
+
 module.exports = {
     createContact,
-    getAllContacts,
+    // getAllContacts,
     deleteContact,
+    deleteMultipleContacts,
     editContact,
     getContact,
     searchContact,
@@ -312,5 +365,7 @@ module.exports = {
     getInterestedContacts,
     addActivityToContact,
     deleteActivity,
-    getContactActivities
+    getContactActivities,
+    checkUnique,
+    getMyContacts,
 };

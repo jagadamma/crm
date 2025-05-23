@@ -26,7 +26,7 @@ const Signup: React.FC = () => {
   const handleRegister = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     try {
-      const response = await axios.post(`/api/auth/register`, formData);
+      await axios.post("/api/auth/register", formData);
       toast.success("User Registered Successfully!", {
         position: "top-right",
         autoClose: 3000,
@@ -39,11 +39,14 @@ const Signup: React.FC = () => {
       setTimeout(() => {
         navigate("/login");
       }, 2000);
-    } catch (error: any) {
-      if (error.response && error.response.data?.message) {
-        toast.error(error.response.data.message);
+    } catch (err: unknown) {
+      if (axios.isAxiosError(err) && err.response?.data?.message) {
+        toast.error(err.response.data.message, {
+          position: "top-right",
+          autoClose: 3000,
+        });
       } else {
-        toast.error("Registration failed. Try again.");
+        toast.error("Something went wrong. Please try again.");
       }
     }
   };

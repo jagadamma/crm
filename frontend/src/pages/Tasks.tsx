@@ -11,8 +11,8 @@ const Tasks = () => {
       
       <Tabs defaultValue="tabular">
         <TabsList>
-          <TabsTrigger value="tabular">Tabular View</TabsTrigger>
-          <TabsTrigger value="kanban">Kanban Board</TabsTrigger>
+          <TabsTrigger className="cursor-pointer" value="tabular">Tabular View</TabsTrigger>
+          <TabsTrigger className="cursor-pointer" value="kanban">Kanban Board</TabsTrigger>
         </TabsList>
         <TabsContent value="tabular">
           <TabularView />

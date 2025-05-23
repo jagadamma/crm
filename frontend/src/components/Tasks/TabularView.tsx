@@ -32,8 +32,6 @@ import { Badge } from "@/components/ui/badge";
 import TaskForm from "./TaskForm";
 import { format } from "date-fns";
 
-
-
 export const TabularView: React.FC = () => {
   const { updateTask, deleteTask } = useTaskStore();
   const [tasks, setTasks] = useState<Record<string, Task>>({});
@@ -80,7 +78,11 @@ export const TabularView: React.FC = () => {
   const toggleExpanded = (taskId: string) => {
     setExpandedTasks((prev) => {
       const newSet = new Set(prev);
-      newSet.has(taskId) ? newSet.delete(taskId) : newSet.add(taskId);
+      if (newSet.has(taskId)) {
+        newSet.delete(taskId);
+      } else {
+        newSet.add(taskId);
+      }
       return newSet;
     });
   };
@@ -88,14 +90,36 @@ export const TabularView: React.FC = () => {
   const formatDueDate = (dueDate?: string) =>
     dueDate ? format(new Date(dueDate), "PP") : "No Due Date";
 
+  const renderTags = (tags: string | string[] | undefined) => {
+    if (!tags) return null;
+    
+    if (Array.isArray(tags)) {
+      return tags.map((tag: string, index: number) => (
+        <Badge key={index} variant="outline" className="text-xs">
+          {tag}
+        </Badge>
+      ));
+    }
+
+    if (typeof tags === 'string' && tags.trim().length > 0) {
+      return tags.split(',').map((tag: string, index: number) => (
+        <Badge key={index} variant="outline" className="text-xs">
+          {tag.trim()}
+        </Badge>
+      ));
+    }
+
+    return null;
+  };
+
   return (
     <div className="p-6">
       <div className="flex items-center justify-between mb-6">
         <h1 className="text-2xl font-bold">Tabular View</h1>
         <Sheet>
           <SheetTrigger asChild>
-            <Button>
-              <Plus className="mr-2 h-4 w-4" /> Add Task
+            <Button className="bg-green-600 hover:bg-green-700 cursor-pointer">
+              <Plus className="h-4 w-4" /> Add Task
             </Button>
           </SheetTrigger>
           <SheetContent>
@@ -160,8 +184,8 @@ export const TabularView: React.FC = () => {
                             item.priority === "high"
                               ? "destructive"
                               : item.priority === "medium"
-                                ? "default"
-                                : "secondary"
+                              ? "default"
+                              : "secondary"
                           }
                         >
                           {item.priority}
@@ -171,29 +195,7 @@ export const TabularView: React.FC = () => {
                       <TableCell>{item.assignedTo}</TableCell>
                       <TableCell>
                         <div className="flex flex-wrap gap-1">
-                          {Array.isArray(item.tags)
-                            ? item.tags.map((tag, index) => (
-                              <Badge
-                                key={index}
-                                variant="outline"
-                                className="text-xs"
-                              >
-                                {tag}
-                              </Badge>
-                            ))
-                            : typeof item.tags === "string" && item.tags
-                              ? (item.tags as string).trim().length > 0
-                                ? (item.tags as string).split(",").map((tag, index) => (
-                                  <Badge
-                                    key={index}
-                                    variant="outline"
-                                    className="text-xs"
-                                  >
-                                    {tag.trim()}
-                                  </Badge>
-                                ))
-                                : null
-                              : null}
+                          {renderTags(item.tags)}
                         </div>
                       </TableCell>
                       <TableCell className="text-right">

@@ -48,13 +48,13 @@ options:
 
 steps:
   # Step 0: Show Node Version
-  - name: 'node:lts'
+  - name: 'node:20-slim'
     id: 'Show Node Version'
     entrypoint: 'node'
     args: ['-v']
 
   # Step 1: Build Frontend
-  - name: 'node:lts'
+  - name: 'node:20-slim'
     id: 'Build Frontend'
     dir: 'frontend'
     entrypoint: 'bash'
@@ -65,7 +65,7 @@ steps:
         npm run build
 
   # Step 2: Prepare Backend
-  - name: 'node:lts'
+  - name: 'node:20-slim'
     id: 'Prepare Backend'
     dir: 'backend'
     entrypoint: 'bash'

@@ -88,6 +88,18 @@ app.use('/api/users', userRouter);
 app.use('/api/contacts', contactrouter);
 // app.use('/api/leads', leadrouter);
 app.use('/api/tasks', taskrouter);
+//// helth check
+app.get('/assets-list', (req, res) => {
+    const fs = require('fs');
+    const path = require('path');
+    const assetsDir = path.join(__dirname, 'public', 'assets');
+    fs.readdir(assetsDir, (err, files) => {
+        if (err) {
+            return res.status(500).json({ error: err.toString() });
+        }
+        res.json({ files });
+    });
+});
 
 // React frontend fallback (must be after other routes)
 app.get('*', (req, res) => {

@@ -21,6 +21,7 @@ const User = lazy(() => import("@/pages/User"));
 const Tasks = lazy(() => import("./pages/Tasks"));
 const ViewContact = lazy(() => import("./pages/ViewContact"));
 
+
 const queryClient = new QueryClient();
 
 const App: React.FC = () => {

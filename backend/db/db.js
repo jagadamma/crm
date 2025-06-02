@@ -54,12 +54,13 @@ let sequelize;
 
 if (process.env.INSTANCE_CONNECTION_NAME) {
 
-    console.log(`------- INSTANCE_CONNECTION_NAME ---${process.env.INSTANCE_CONNECTION_NAME}-----`, process.env.INSTANCE_CONNECTION_NAME)
+    console.log(`----- INSTANCE_CONNECTION_NAME ---${process.env.INSTANCE_CONNECTION_NAME}-----`)
+    console.log(`----- INSTANCE_CONNECTION_NAME ---${process.env.INSTANCE_CONNECTION_NAME.trim()}-----`)
     // On GCP, use socketPath (Cloud SQL)
     sequelize = new Sequelize(process.env.DB_NAME, process.env.DB_USER, process.env.DB_PASSWORD, {
         dialect: 'mysql',
         dialectOptions: {
-            socketPath: `/cloudsql/${process.env.INSTANCE_CONNECTION_NAME}`,
+            socketPath: `/cloudsql/${process.env.INSTANCE_CONNECTION_NAME.trim()}`,
             connectTimeout: 10000,
         },
     });

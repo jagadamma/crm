@@ -52,16 +52,9 @@ const cloudinary = require('cloudinary').v2;
 
 const app = express();
 
-// ⬇ Increase the limit to 10mb (you can adjust as needed)
-app.use(bodyParser.json({ limit: '10mb' }));
-app.use(bodyParser.urlencoded({ limit: '10mb', extended: true }));
 
-// Cloudinary configuration
-cloudinary.config({
-    cloud_name: process.env.CLOUD_NAME,
-    api_key: process.env.CLOUD_API_KEY,
-    api_secret: process.env.CLOUD_API_SECRET
-});
+
+
 
 // Middlewares
 app.use(cors({
@@ -70,9 +63,18 @@ app.use(cors({
     allowedHeaders: ['Content-Type', 'Authorization'],
 }));
 app.use(bodyParser.json());
+// ⬇ Increase the limit to 10mb (you can adjust as needed)
+app.use(bodyParser.json({ limit: '10mb' }));
+app.use(bodyParser.urlencoded({ limit: '10mb', extended: true }));
 
 // Serve static frontend files from /public (React build)
 app.use(express.static(path.join(__dirname, 'public')));
+// Cloudinary configuration
+cloudinary.config({
+    cloud_name: process.env.CLOUD_NAME,
+    api_key: process.env.CLOUD_API_KEY,
+    api_secret: process.env.CLOUD_API_SECRET
+});
 
 // Serve uploaded files (Multer) from /uploads
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));

@@ -64,7 +64,11 @@ cloudinary.config({
 });
 
 // Middlewares
-app.use(cors());
+app.use(cors({
+    origin: '*', // For all domains. For production, specify allowed origin
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization'],
+}));
 app.use(bodyParser.json());
 
 // Serve static frontend files from /public (React build)

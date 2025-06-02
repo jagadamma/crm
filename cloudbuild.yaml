@@ -91,4 +91,13 @@ steps:
       - '--platform'
       - 'managed'
       - '--allow-unauthenticated'
+      - '--add-cloudsql-instances'
+      - 'YOUR_PROJECT_ID:asia-south1:aitq-user-data'   # <---- UPDATE THIS
+      - '--set-env-vars'
+      - |
+        DB_NAME=crm,
+        DB_USER=root-crm,
+        DB_PASSWORD=Omkarghogare@89,
+        INSTANCE_CONNECTION_NAME=YOUR_PROJECT_ID:asia-south1:aitq-user-data
 
+timeout: 1200s 

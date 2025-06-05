@@ -21,6 +21,7 @@ export default defineConfig({
     },
   },
   build: {
+    sourcemap: true,
     chunkSizeWarningLimit: 1000, // Increase the default 500 KB warning limit
     rollupOptions: {
       output: {
